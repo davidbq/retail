@@ -1,12 +1,17 @@
 services:
-  backend:
+  retail-service:
     build: ./backend/retail-service
     ports:
       - "3000:3000"
     depends_on:
       - mongo-server
     networks:
-      - backend_db_network
+      - retail-mongo-network
+
+  customers-service:
+    build: ./backend/customers-service
+    ports:
+      - "3001:3000"
 
   mongo-server:
     build:
@@ -23,7 +28,7 @@ services:
       - mongodb_data:/data/db
       - ./database/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
     networks:
-      - backend_db_network
+      - retail-mongo-network
 
   mongo-client:
     build:
@@ -43,10 +48,10 @@ services:
     depends_on:
       - mongo-server
     networks:
-      - backend_db_network
+      - retail-mongo-network
 
 volumes:
   mongodb_data:
 
 networks:
-  backend_db_network:
+  retail-mongo-network:
