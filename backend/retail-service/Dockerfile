@@ -11,9 +11,6 @@ RUN yarn install --frozen-lockfile
 # Copy the rest of the application code
 COPY . .
 
-# Set environment to production
-ENV NODE_ENV=production
-
 # Expose the port the app runs on
 EXPOSE 3000
 
