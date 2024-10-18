@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   retail-service:
     container_name: retail-retail-service
