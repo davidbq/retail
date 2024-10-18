@@ -3,6 +3,7 @@ const helmet = require('helmet');
 const cors = require('cors');
 const { addSecurityHeaders, rateLimiter } = require('./middlewares/security');
 const healthCheckRoutes = require('./routes/healthCheck');
+const tablesRoutes = require('./routes/tables');
 
 const app = express();
 
@@ -18,6 +19,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Routes
 app.use('/health', healthCheckRoutes);
+app.use('/tables', tablesRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

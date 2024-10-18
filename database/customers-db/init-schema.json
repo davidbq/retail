@@ -1,0 +1,41 @@
+{
+    "TableName": "dev-Customers",
+    "KeySchema": [
+      {
+        "AttributeName": "CustomerId",
+        "KeyType": "HASH"
+      }
+    ],
+    "AttributeDefinitions": [
+      {
+        "AttributeName": "CustomerId",
+        "AttributeType": "S"
+      },
+      {
+        "AttributeName": "Email",
+        "AttributeType": "S"
+      }
+    ],
+    "GlobalSecondaryIndexes": [
+      {
+        "IndexName": "EmailIndex",
+        "KeySchema": [
+          {
+            "AttributeName": "Email",
+            "KeyType": "HASH"
+          }
+        ],
+        "Projection": {
+          "ProjectionType": "ALL"
+        },
+        "ProvisionedThroughput": {
+          "ReadCapacityUnits": 5,
+          "WriteCapacityUnits": 5
+        }
+      }
+    ],
+    "ProvisionedThroughput": {
+      "ReadCapacityUnits": 5,
+      "WriteCapacityUnits": 5
+    }
+  }

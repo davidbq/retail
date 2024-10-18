@@ -1,17 +1,13 @@
 services:
   retail-service:
     build: ./backend/retail-service
+    container_name: retail-retail-service
     ports:
       - "3000:3000"
     depends_on:
       - mongo-server
     networks:
       - retail-mongo-network
-
-  customers-service:
-    build: ./backend/customers-service
-    ports:
-      - "3001:3000"
 
   mongo-server:
     build:
@@ -50,8 +46,78 @@ services:
     networks:
       - retail-mongo-network
 
+  customers-service:
+    container_name: customers-service
+    build: ./backend/customers-service
+    ports:
+      - "3001:3000"
+    environment:
+     AWS_ACCESS_KEY_ID: 'dummy'
+     AWS_SECRET_ACCESS_KEY: 'dummy'
+    depends_on:
+      - customers-db
+    networks:
+      - customers-network
+
+  customers-db:
+    container_name: customers-db
+    build: ./database/customers-db
+    restart: always
+    user: root
+    environment:
+      AWS_ACCESS_KEY_ID: 'dummy'
+      AWS_SECRET_ACCESS_KEY: 'dummy'
+      AWS_REGION: 'local'
+    ports:
+      - "8000:8000"
+    volumes:
+     - customers_data:/home/dynamodblocal/data
+    working_dir: /home/dynamodblocal
+    command: "-jar DynamoDBLocal.jar -sharedDb -dbPath ./data"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          'curl -s -o /dev/null -w "%{http_code}" http://localhost:8000 | grep 400',
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - customers-network
+
+  customers-db-init:
+    container_name: customers-db-init
+    image: amazon/aws-cli
+    depends_on:
+      customers-db:
+        condition: service_healthy
+    volumes:
+      - ./database/customers-db/init-schema.json:/tmp/dynamodb/init-schema.json
+      - ./database/customers-db/init-data.json:/tmp/dynamodb/init-data.json
+    environment:
+      AWS_ACCESS_KEY_ID: 'dummy'
+      AWS_SECRET_ACCESS_KEY: 'dummy'
+      AWS_REGION: 'local'
+    entrypoint:
+      - bash
+    command:
+      - '-c'
+      - |
+        if ! aws dynamodb describe-table --table-name dev-Customers --endpoint-url http://customers-db:8000 2>/dev/null; then
+          echo "Table does not exist. Creating table and inserting data.";
+          aws dynamodb create-table --cli-input-json file:///tmp/dynamodb/init-schema.json --endpoint-url http://customers-db:8000 &&
+          aws dynamodb batch-write-item --request-items file:///tmp/dynamodb/init-data.json --endpoint-url http://customers-db:8000;
+        else
+          echo "Table already exists. Skipping creation and data insertion.";
+        fi
+    networks:
+      - customers-network
+
 volumes:
   mongodb_data:
+  customers_data:
 
 networks:
   retail-mongo-network:
+  customers-network:

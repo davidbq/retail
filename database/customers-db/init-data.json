@@ -1,0 +1,54 @@
+{
+    "dev-Customers": [
+      {
+        "PutRequest": {
+          "Item": {
+            "CustomerId": {"S": "12345"},
+            "Name": {"S": "John Doe"},
+            "Email": {"S": "johndoe@example.com"},
+            "Age": {"N": "35"}
+          }
+        }
+      },
+      {
+        "PutRequest": {
+          "Item": {
+            "CustomerId": {"S": "67890"},
+            "Name": {"S": "Jane Smith"},
+            "Email": {"S": "janesmith@example.com"},
+            "Age": {"N": "28"}
+          }
+        }
+      },
+      {
+        "PutRequest": {
+          "Item": {
+            "CustomerId": {"S": "11121"},
+            "Name": {"S": "Alice Brown"},
+            "Email": {"S": "alicebrown@example.com"},
+            "Age": {"N": "30"}
+          }
+        }
+      },
+      {
+        "PutRequest": {
+          "Item": {
+            "CustomerId": {"S": "31415"},
+            "Name": {"S": "Bob White"},
+            "Email": {"S": "bobwhite@example.com"},
+            "Age": {"N": "40"}
+          }
+        }
+      },
+      {
+        "PutRequest": {
+          "Item": {
+            "CustomerId": {"S": "16171"},
+            "Name": {"S": "Charlie Green"},
+            "Email": {"S": "charliegreen@example.com"},
+            "Age": {"N": "25"}
+          }
+        }
+      }
+    ]
+  }
