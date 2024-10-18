@@ -1,50 +1,34 @@
+version: '3.8'
+
 services:
   retail-service:
-    build: ./backend/retail-service
     container_name: retail-retail-service
+    build: ./backend/retail-service
     ports:
       - "3000:3000"
-    depends_on:
-      - mongo-server
+    environment:
+      AWS_ACCESS_KEY_ID: 'dummy'
+      AWS_SECRET_ACCESS_KEY: 'dummy'
     networks:
-      - retail-mongo-network
-
-  mongo-server:
-    build:
-      context: ./database
-      dockerfile: Dockerfile.mongo-server
-    container_name: mongo-server
+      - retail-network
     restart: always
+    depends_on:
+      - retail-db
+
+  retail-db:
+    container_name: retail-db
+    build: ./database/retail-db
     ports:
       - "27017:27017"
     environment:
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: pass
     volumes:
-      - mongodb_data:/data/db
-      - ./database/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+      - retail_data:/data/db
+      - ./database/retail-db/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js
     networks:
-      - retail-mongo-network
-
-  mongo-client:
-    build:
-      context: ./database
-      dockerfile: Dockerfile.mongo-client
-    container_name: mongo-client
+      - retail-network
     restart: always
-    ports:
-      - "8081:8081"
-    environment:
-      ME_CONFIG_BASICAUTH_USERNAME: ${MONGO_EXPRESS_USER}
-      ME_CONFIG_BASICAUTH_PASSWORD: ${MONGO_EXPRESS_PASSWORD}
-      ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_ROOT_USER}
-      ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_ROOT_PASSWORD}
-      ME_CONFIG_MONGODB_SERVER: mongo-server
-      ME_CONFIG_MONGODB_PORT: 27017
-    depends_on:
-      - mongo-server
-    networks:
-      - retail-mongo-network
 
   customers-service:
     container_name: customers-service
@@ -52,26 +36,26 @@ services:
     ports:
       - "3001:3000"
     environment:
-     AWS_ACCESS_KEY_ID: 'dummy'
-     AWS_SECRET_ACCESS_KEY: 'dummy'
-    depends_on:
-      - customers-db
+      AWS_ACCESS_KEY_ID: 'dummy'
+      AWS_SECRET_ACCESS_KEY: 'dummy'
     networks:
       - customers-network
+    depends_on:
+      - customers-db
 
   customers-db:
     container_name: customers-db
     build: ./database/customers-db
     restart: always
     user: root
+    ports:
+      - "8000:8000"
     environment:
       AWS_ACCESS_KEY_ID: 'dummy'
       AWS_SECRET_ACCESS_KEY: 'dummy'
       AWS_REGION: 'local'
-    ports:
-      - "8000:8000"
     volumes:
-     - customers_data:/home/dynamodblocal/data
+      - customers_data:/home/dynamodblocal/data
     working_dir: /home/dynamodblocal
     command: "-jar DynamoDBLocal.jar -sharedDb -dbPath ./data"
     healthcheck:
@@ -115,9 +99,9 @@ services:
       - customers-network
 
 volumes:
-  mongodb_data:
+  retail_data:
   customers_data:
 
 networks:
-  retail-mongo-network:
+  retail-network:
   customers-network:
