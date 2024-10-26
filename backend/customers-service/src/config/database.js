@@ -1,8 +1,9 @@
-const { DynamoDBClient, ListTablesCommand } = require('@aws-sdk/client-dynamodb');
+const { DynamoDBClient, ListTablesCommand, ScanCommand } = require('@aws-sdk/client-dynamodb');
+const { unmarshall } = require('@aws-sdk/util-dynamodb');
 
 // Configuration
 const isLocal = process.env.IS_LOCAL;
-const region = process.env.AWS_REGION || 'eu-west-1';
+const region = process.env.AWS_REGION || 'local';
 
 // DynamoDB client configuration
 const config = {
@@ -10,8 +11,8 @@ const config = {
 };
 
 // If running locally, use local DynamoDB instance
-if (isLocal) {
-    config.endpoint = process.env.DYNAMODB_ENDPOINT || 'http://localhost:8000';
+if (isLocal === 'true') {
+    config.endpoint = 'http://customers-db:8000';
     config.credentials = {
       accessKeyId: 'dummy',
       secretAccessKey: 'dummy',
@@ -49,10 +50,30 @@ const listAllTables = async () => {
 const getTableName = (baseName) => {
     const prefix = process.env.DYNAMODB_TABLE_PREFIX || '';
     return `${prefix}${baseName}`;
-  };
+};
+
+const getAllItems = async (tableName) => {
+  try {
+    const params = {
+      TableName: tableName,
+    };
+
+    const command = new ScanCommand(params);
+    const data = await client.send(command);
+
+    // Unmarshall the items
+    const items = data.Items.map(item => unmarshall(item));
+
+    return items;
+  } catch (error) {
+    console.error('Error getting all items:', error);
+    throw error;
+  }
+};
 
 // Export the DynamoDB client and helper functions
 module.exports = {
   getTableName,
-  listAllTables
+  listAllTables,
+  getAllItems
 };

@@ -1,11 +1,12 @@
 const express = require('express');
 const router = express.Router();
-const { listAllTables } = require('../config/database');
+const { getAllItems } = require('../config/database');
 
 router.get('/', async (req, res) => {
 	try {
-		const tables = await listAllTables();
-		res.json(tables);
+
+        const allCustomers = await getAllItems('retail-customers-table');
+		res.json(allCustomers);
 	} catch (error) {
 		res.status(500).json({ error: error.message });
 	}
