@@ -33,9 +33,6 @@ services:
     build: ./backend/customers-service
     ports:
       - "3001:3000"
-    environment:
-      AWS_ACCESS_KEY_ID: 'dummy'
-      AWS_SECRET_ACCESS_KEY: 'dummy'
     networks:
       - customers-network
     depends_on:

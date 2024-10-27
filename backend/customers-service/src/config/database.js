@@ -1,50 +1,20 @@
-const { DynamoDBClient, ListTablesCommand, ScanCommand } = require('@aws-sdk/client-dynamodb');
+const { DynamoDBClient, ScanCommand } = require('@aws-sdk/client-dynamodb');
 const { unmarshall } = require('@aws-sdk/util-dynamodb');
 
-// Configuration
-const isLocal = process.env.IS_LOCAL;
-const region = process.env.AWS_REGION || 'local';
+const isLocal = process.env.IS_LOCAL === 'true';
 
-// DynamoDB client configuration
-const config = {
-  region: region,
-};
-
-// If running locally, use local DynamoDB instance
-if (isLocal === 'true') {
-    config.endpoint = 'http://customers-db:8000';
-    config.credentials = {
-      accessKeyId: 'dummy',
-      secretAccessKey: 'dummy',
-      region: 'local'
-    };
-}
-
-// Create DynamoDB client
-const client = new DynamoDBClient(config);
-
-// Function to list all tables
-const listAllTables = async () => {
-    try {
-      let tables = [];
-      let lastEvaluatedTableName = null;
-      do {
-        const params = {
-          Limit: 100,
-          ExclusiveStartTableName: lastEvaluatedTableName
-        };
-        const command = new ListTablesCommand(params);
-        const response = await client.send(command);
-        tables = tables.concat(response.TableNames);
-        lastEvaluatedTableName = response.LastEvaluatedTableName;
-      } while (lastEvaluatedTableName);
-
-      return tables;
-    } catch (error) {
-      console.error('Error listing tables:', error);
-      throw error;
-    }
-  };
+const client = isLocal ?
+    // Local development configuration
+    new DynamoDBClient({
+        endpoint: 'http://customers-db:8000',
+        credentials: {
+            accessKeyId: 'dummy',
+            secretAccessKey: 'dummy',
+        },
+        region: 'local'
+    }) :
+    // AWS production configuration
+    new DynamoDBClient();
 
 // Helper function to get a table name with optional prefix for different environments
 const getTableName = (baseName) => {
@@ -71,9 +41,7 @@ const getAllItems = async (tableName) => {
   }
 };
 
-// Export the DynamoDB client and helper functions
 module.exports = {
   getTableName,
-  listAllTables,
   getAllItems
 };
