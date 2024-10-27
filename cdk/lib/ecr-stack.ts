@@ -1,29 +1,40 @@
-import * as cdk from 'aws-cdk-lib';
-import * as ecr from 'aws-cdk-lib/aws-ecr';
+import { CfnOutput, RemovalPolicy, Stack, StackProps } from 'aws-cdk-lib';
+import { Repository } from 'aws-cdk-lib/aws-ecr';
+// Cdk constructs imports
 import { Construct } from 'constructs';
-import { CUSTOMERS, SERVICE, RETAIL, RETAILCUSTOMERS } from '../config/constants';
 
-export class RetailEcrStack extends cdk.Stack {
+export class RetailEcrStack extends Stack {
 
-  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+  constructor(scope: Construct, id: string, servicesNames: string[], props?: StackProps) {
     super(scope, id, props);
 
+    // Create ECR repositories for each service
+    servicesNames.forEach((serviceName) => {
+      this.createEcrRepository(serviceName);
+    });
+  }
+
+  /**
+   * Creates an ECR repository with the specified service name and outputs ARN and name.
+   * @param {string} serviceName - The service name for the ECR repository.
+   */
+  private createEcrRepository(serviceName: string): void {
     // Create ECR Repository
-    const customersRepository = new ecr.Repository(this, `${RETAILCUSTOMERS}EcrRepo`, {
-      repositoryName: `${RETAIL}-${CUSTOMERS}-${SERVICE}`,
-      removalPolicy: cdk.RemovalPolicy.DESTROY,
-      emptyOnDelete: true
+    const repository = new Repository(this, `${serviceName}EcrRepo`, {
+      repositoryName: `${serviceName}-repo`,
+      removalPolicy: RemovalPolicy.DESTROY,
+      emptyOnDelete: true,
     });
 
     // Export the ECR repository ARN and name
-    new cdk.CfnOutput(this, `${RETAILCUSTOMERS}EcrRepoArn`, {
-        value: customersRepository.repositoryArn,
-        exportName: `${RETAILCUSTOMERS}EcrRepoArn`
-      });
+    new CfnOutput(this, `${serviceName}EcrRepoArn`, {
+      value: repository.repositoryArn,
+      exportName: `${serviceName}EcrRepoArn`,
+    });
 
-      new cdk.CfnOutput(this, `${RETAILCUSTOMERS}EcrRepositoryName`, {
-        value: customersRepository.repositoryName,
-        exportName: `${RETAILCUSTOMERS}EcrRepoName`
-      });
+    new CfnOutput(this, `${serviceName}EcrRepositoryName`, {
+      value: repository.repositoryName,
+      exportName: `${serviceName}EcrRepoName`,
+    });
   }
 }

@@ -9,7 +9,7 @@
     "watch": "tsc -w",
     "test": "jest",
     "cdk": "cdk",
-    "deploy-all": "cdk deploy RetailEcrStack && docker push 442426860511.dkr.ecr.eu-west-1.amazonaws.com/retail-customers-service:latest && cdk deploy RetailMainStack --require-approval never",
+    "deploy-all": "cdk deploy RetailEcrStack && docker push 442426860511.dkr.ecr.eu-west-1.amazonaws.com/customers-repo:latest && cdk deploy RetailMainStack --require-approval never",
     "destroy-all": "cdk destroy RetailEcrStack --force"
   },
   "devDependencies": {
