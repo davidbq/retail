@@ -9,7 +9,7 @@ import { Repository } from 'aws-cdk-lib/aws-ecr';
 import { Construct } from 'constructs';
 // Custom Config Imports
 import { CUSTOMERS } from '../config/constants';
-import { DEFAULT } from '../config/ecs-config';
+import { FARGATE_DEF_CONFIG } from '../config/ecs-config';
 // Custom Interfaces Imports
 import { FargateConfig } from '../interfaces/fargate-config';
 
@@ -27,7 +27,7 @@ export class RetailMainStack extends Stack {
       CUSTOMERS,
       customersRepository,
       customersTable.tableName,
-      DEFAULT
+      FARGATE_DEF_CONFIG
     );
 
     // Grant DynamoDB permissions to the task
